@@ -25,7 +25,7 @@ mkdir -p "$APPDIR" "$DIST" "$TOOLS" "$SYSROOT"
 
 echo "== 1/5 Téléchargement des outils (python-build-standalone, appimagetool, squashfs-tools) =="
 python3 - "$TOOLS" "$SYSROOT" <<'PYEOF'
-import json, os, re, struct, subprocess, sys, urllib.request, lzma
+import json, os, re, shutil, struct, subprocess, sys, urllib.request, lzma
 from pathlib import Path
 
 tools = Path(sys.argv[1]); sysroot = Path(sys.argv[2])
@@ -63,24 +63,42 @@ appimagetool = telecharger(
     tools / "appimagetool-x86_64.AppImage")
 os.chmod(appimagetool, 0o755)
 
-# --- mksquashfs (paquets Debian extraits localement) ---
+# --- mksquashfs ---
+# 1) on réutilise le mksquashfs du système s'il existe
+# 2) sinon on télécharge les paquets Debian (sans root) dans /tmp et on les extrait
 mks = tools / "bin" / "mksquashfs"
+if not mks.exists() and shutil.which("mksquashfs"):
+    (tools / "bin").mkdir(parents=True, exist_ok=True)
+    os.symlink(shutil.which("mksquashfs"), mks)
 if not mks.exists():
-    lists = "/tmp/apt/lists"
-    subprocess.run(["apt-get", "-o", f"Dir::State::Lists={lists}", "-o", "Debug::NoLocking=1",
-                    "download", "squashfs-tools", "liblz4-1", "liblzo2-2", "libzstd1", "zlib1g",
-                    "libgcc-s1"], cwd=str(tools), check=True, capture_output=True)
-    tools.mkdir(exist_ok=True)
-    for deb in tools.glob("*.deb"):
-        subprocess.run(["dpkg-deb", "-x", str(deb), str(sysroot)], check=True)
-    bin_src = sysroot / "usr/bin/mksquashfs"
-    tools.mkdir(exist_ok=True); (tools / "bin").mkdir(exist_ok=True)
-    os.symlink(bin_src, mks)
-    (tools / "lib").mkdir(exist_ok=True)
-    for so in (sysroot / "usr/lib/x86_64-linux-gnu").glob("*.so*"):
-        lien = tools / "lib" / so.name
-        if not lien.exists():
-            os.symlink(so, lien)
+    lists = Path("/tmp/apt/lists")
+    try:
+        (lists / "partial").mkdir(parents=True, exist_ok=True)
+        if not any(lists.glob("*Packages*")):
+            print("mise à jour des listes apt locales (sans root)...")
+            subprocess.run(["apt-get", "-o", f"Dir::State::Lists={lists}", "-o", "APT::Get::ListCleanup=0",
+                            "-o", "Debug::NoLocking=1", "update"], check=True, capture_output=True)
+        subprocess.run(["apt-get", "-o", f"Dir::State::Lists={lists}", "-o", "Debug::NoLocking=1",
+                        "download", "squashfs-tools", "liblz4-1", "liblzo2-2", "libzstd1", "zlib1g",
+                        "libgcc-s1"], cwd=str(tools), check=True, capture_output=True)
+        for deb in tools.glob("*.deb"):
+            subprocess.run(["dpkg-deb", "-x", str(deb), str(sysroot)], check=True)
+        bin_src = sysroot / "usr/bin/mksquashfs"
+        (tools / "bin").mkdir(parents=True, exist_ok=True)
+        os.symlink(bin_src, mks)
+        (tools / "lib").mkdir(exist_ok=True)
+        for so in (sysroot / "usr/lib/x86_64-linux-gnu").glob("*.so*"):
+            lien = tools / "lib" / so.name
+            if not lien.exists():
+                os.symlink(so, lien)
+    except Exception as e:
+        raise SystemExit(
+            "Impossible d'obtenir mksquashfs automatiquement.\n"
+            "Installez-le via votre gestionnaire de paquets, par ex. :\n"
+            "  sudo apt install squashfs-tools        (Debian/Ubuntu)\n"
+            "  sudo dnf install squashfs-tools        (Fedora)\n"
+            "  sudo pacman -S squashfs-tools          (Arch)\n"
+            f"Détail de l'erreur : {e}")
 print("mksquashfs prêt")
 PYEOF
 
