@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=IA Locale
+GenericName=Modèles d'IA locaux
+Comment=Discutez avec des modèles d'IA locaux (GGUF, Transformers) sans navigateur
+Exec=ia-locale
+Icon=ia-locale
+Terminal=false
+Categories=Utility;Science;Education;
+Keywords=ia;llm;gguf;transformers;local;hors ligne;
+StartupNotify=true
