@@ -61,7 +61,8 @@ Lancement : `chmod +x IA-Locale-x86_64.AppImage && ./IA-Locale-x86_64.AppImage`
 ### Dépendances système nécessaires (déjà présentes sur la plupart des distributions de bureau)
 
 - glibc ≥ 2.17 (Ubuntu 18.04+, Debian 10+, etc.) ;
-- `libGL.so.1`, `libEGL.so.1` (mesa), `libxkbcommon.so.0`, `libdbus-1.so.3`, `libfontconfig.so.1`, `libglib-2.0.so.0`.
+- `libGL.so.1`, `libEGL.so.1` (mesa), `libxkbcommon.so.0`, `libdbus-1.so.3`, `libfontconfig.so.1`, `libglib-2.0.so.0` ;
+- les libs X de curseur (`libxcb-cursor0` et dépendances) sont **embarquées** dans l'AppImage ; si votre distribution les fournit déjà, tant mieux.
 
 Exemples : `sudo apt install libgl1 libegl1 libxkbcommon0 libdbus-1-3 libfontconfig1 libglib2.0-0` (Debian/Ubuntu).
 
@@ -97,6 +98,8 @@ python3 scripts/verifier_ui.py                            # démarrage + capture
 ```
 
 `scripts/verifier.sh` enchaîne tests + vérification de l'interface + vérification de l'AppImage.
+
+Prérequis pour `./build_appimage.sh` : machine Linux x86_64, `python3`, Internet, ~1,5 Go libres. `mksquashfs` est récupéré automatiquement (système, ou paquets Debian téléchargés sans root) ; sur une autre distribution, installez `squashfs-tools` via votre gestionnaire de paquets.
 
 ## Vérifications effectuées
 

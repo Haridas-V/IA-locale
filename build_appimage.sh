@@ -40,12 +40,18 @@ def telecharger(url, dest):
     return dest
 
 # --- python-build-standalone (dernier release, CPython 3.12 x86_64) ---
-api = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
-with urllib.request.urlopen(api, timeout=60) as r:
-    release = json.load(r)
+# On réutilise l'archive en cache si elle existe (évite la limite de débit de l'API GitHub).
 motif = re.compile(r"cpython-3\.12\.\d+\+\d+-x86_64-unknown-linux-gnu-install_only_stripped\.tar\.gz$")
-asset = next(a for a in release["assets"] if motif.search(a["name"]))
-archive = telecharger(asset["browser_download_url"], tools / asset["name"])
+candidates = sorted(p for p in tools.glob("cpython-3.12*install_only_stripped.tar.gz") if motif.search(p.name))
+if candidates:
+    archive = candidates[-1]
+    print("archive python-build-standalone déjà en cache :", archive.name)
+else:
+    api = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
+    with urllib.request.urlopen(api, timeout=60) as r:
+        release = json.load(r)
+    asset = next(a for a in release["assets"] if motif.search(a["name"]))
+    archive = telecharger(asset["browser_download_url"], tools / asset["name"])
 cible = tools / "python-standalone"
 if not (cible / "bin" / "python3").exists():
     subprocess.run(["tar", "-xzf", str(archive), "-C", str(tools)], check=True)
@@ -63,6 +69,21 @@ appimagetool = telecharger(
     tools / "appimagetool-x86_64.AppImage")
 os.chmod(appimagetool, 0o755)
 
+# --- helpers apt locaux (sans root : listes dans /tmp/apt/lists) ---
+lists = Path("/tmp/apt/lists")
+
+def apt_update():
+    (lists / "partial").mkdir(parents=True, exist_ok=True)
+    if not any(lists.glob("*Packages*")):
+        print("mise à jour des listes apt locales (sans root)...")
+        subprocess.run(["apt-get", "-o", f"Dir::State::Lists={lists}", "-o", "APT::Get::ListCleanup=0",
+                        "-o", "Debug::NoLocking=1", "update"], check=True, capture_output=True)
+
+def apt_download(paquets, cwd):
+    apt_update()
+    subprocess.run(["apt-get", "-o", f"Dir::State::Lists={lists}", "-o", "Debug::NoLocking=1",
+                    "download"] + paquets, cwd=str(cwd), check=True, capture_output=True)
+
 # --- mksquashfs ---
 # 1) on réutilise le mksquashfs du système s'il existe
 # 2) sinon on télécharge les paquets Debian (sans root) dans /tmp et on les extrait
@@ -71,16 +92,8 @@ if not mks.exists() and shutil.which("mksquashfs"):
     (tools / "bin").mkdir(parents=True, exist_ok=True)
     os.symlink(shutil.which("mksquashfs"), mks)
 if not mks.exists():
-    lists = Path("/tmp/apt/lists")
     try:
-        (lists / "partial").mkdir(parents=True, exist_ok=True)
-        if not any(lists.glob("*Packages*")):
-            print("mise à jour des listes apt locales (sans root)...")
-            subprocess.run(["apt-get", "-o", f"Dir::State::Lists={lists}", "-o", "APT::Get::ListCleanup=0",
-                            "-o", "Debug::NoLocking=1", "update"], check=True, capture_output=True)
-        subprocess.run(["apt-get", "-o", f"Dir::State::Lists={lists}", "-o", "Debug::NoLocking=1",
-                        "download", "squashfs-tools", "liblz4-1", "liblzo2-2", "libzstd1", "zlib1g",
-                        "libgcc-s1"], cwd=str(tools), check=True, capture_output=True)
+        apt_download(["squashfs-tools", "liblz4-1", "liblzo2-2", "libzstd1", "zlib1g", "libgcc-s1"], tools)
         for deb in tools.glob("*.deb"):
             subprocess.run(["dpkg-deb", "-x", str(deb), str(sysroot)], check=True)
         bin_src = sysroot / "usr/bin/mksquashfs"
@@ -100,6 +113,24 @@ if not mks.exists():
             "  sudo pacman -S squashfs-tools          (Arch)\n"
             f"Détail de l'erreur : {e}")
 print("mksquashfs prêt")
+
+# --- bibliothèques X embarquées (libxcb-cursor0 requis par le plugin xcb de Qt >= 6.5) ---
+xlibs = tools / "xlibs"
+if not (xlibs / "usr/lib/x86_64-linux-gnu").exists():
+    try:
+        apt_download(["libxcb-cursor0", "libxcb-util1", "libxcb-render-util0", "libxcb1",
+                      "libxcb-render0", "libxcb-shape0", "libxcb-image0", "libxcb-icccm4",
+                      "libxcb-keysyms1", "libxcb-randr0", "libxcb-shm0", "libxcb-sync1",
+                      "libxcb-xfixes0", "libxcb-xkb1", "libx11-xcb1", "libxkbcommon-x11-0",
+                      "libx11-6", "libxau6", "libxdmcp6", "libbsd0"], tools)
+        motifs = ("libxcb*.deb", "libx11*.deb", "libxau*.deb", "libxdmcp*.deb", "libbsd*.deb",
+                  "libxkbcommon*.deb")
+        debs = [d for m in motifs for d in tools.glob(m)]
+        for deb in debs:
+            subprocess.run(["dpkg-deb", "-x", str(deb), str(xlibs)], check=True)
+    except Exception as e:
+        print(f"AVERTISSEMENT : libs X non embarquées ({e}) — le lancement pourra nécessiter « sudo apt install libxcb-cursor0 ».")
+print("libs X prêtes")
 PYEOF
 
 export PATH="$TOOLS/bin:$PATH"
@@ -115,8 +146,14 @@ cp -r "$TOOLS/python-standalone" "$APPDIR/usr/python"
 "$PY" -m pip install --quiet --target "$APPDIR/usr/lib/ia-locale-deps" --no-compile "PySide6>=6.6,<7"
 cp -r "$ROOT/ia_locale" "$APPDIR/usr/lib/ia-locale/ia_locale"
 
-echo "== 3/5 Fichiers de l'AppDir (AppRun, desktop, icônes) =="
+echo "== 3/5 Fichiers de l'AppDir (AppRun, desktop, icônes, libs X embarquées) =="
 install -m 755 "$ROOT/packaging/AppRun" "$APPDIR/AppRun"
+if [ -d "$TOOLS/xlibs/usr/lib/x86_64-linux-gnu" ]; then
+    # Convention AppImage : le runtime ajoute automatiquement $APPDIR/usr/lib au LD_LIBRARY_PATH.
+    cp -a "$TOOLS/xlibs/usr/lib/x86_64-linux-gnu/"*.so* "$APPDIR/usr/lib/" 2>/dev/null || true
+    mkdir -p "$APPDIR/usr/lib/ia-locale-libs"
+    cp -a "$TOOLS/xlibs/usr/lib/x86_64-linux-gnu/"*.so* "$APPDIR/usr/lib/ia-locale-libs/" 2>/dev/null || true
+fi
 install -m 644 "$ROOT/packaging/ia-locale.desktop" "$APPDIR/ia-locale.desktop"
 install -m 644 "$ROOT/packaging/ia-locale-512.png" "$APPDIR/ia-locale.png"
 mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps" "$APPDIR/usr/share/icons/hicolor/512x512/apps" "$APPDIR/usr/share/applications"
