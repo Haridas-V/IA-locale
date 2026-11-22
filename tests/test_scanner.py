@@ -21,6 +21,15 @@ def test_scan_dossier_vide(tmp_path):
     assert scanner_modeles(tmp_path / "inexistant") == []
 
 
+def test_scan_gguf_extension_majuscules(tmp_path):
+    from tests.util_gguf import ecrire_gguf, meta_llama_test
+    ecrire_gguf(tmp_path / "MODELE.GGUF", meta_llama_test(), [("w", [10, 10], 6)])
+    ecrire_gguf(tmp_path / "autre.Gguf", meta_llama_test(), [("w", [10, 10], 6)])
+    modeles = scanner_modeles(tmp_path)
+    assert len(modeles) == 2
+    assert all(m.format == "gguf" for m in modeles)
+
+
 def test_trouver_modele(dossier_modeles_faux):
     modeles = scanner_modeles(dossier_modeles_faux)
     m = trouver_modele(modeles, "mon-modele-7b-q4_k_m.gguf")

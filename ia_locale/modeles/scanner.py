@@ -91,12 +91,13 @@ def scanner_modeles(racine: Path) -> list[ModeleInfo]:
     if not racine.is_dir():
         return []
     trouves: list[ModeleInfo] = []
-    for fichier in sorted(racine.rglob("*.gguf")):
-        if fichier.is_file() and not fichier.name.startswith("."):
-            try:
-                trouves.append(scanner_gguf(fichier, racine))
-            except OSError:
-                continue
+    fichiers_gguf = [p for p in racine.rglob("*")
+                     if p.is_file() and p.suffix.lower() == ".gguf" and not p.name.startswith(".")]
+    for fichier in sorted(fichiers_gguf):
+        try:
+            trouves.append(scanner_gguf(fichier, racine))
+        except OSError:
+            continue
     for dossier in sorted(p for p in racine.rglob("*") if p.is_dir()):
         if dossier.name.startswith(".") or dossier.name == "apprentissages":
             continue
