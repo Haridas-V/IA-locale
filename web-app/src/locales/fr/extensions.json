@@ -1,0 +1,200 @@
+{
+  "crashed": {
+    "reason": "Arrêtée : {{error}}",
+    "disabled": "Elle a planté 3 fois en 10 minutes et reste désactivée jusqu'au redémarrage de Jan.",
+    "safeMode": "Des extensions installées ont empêché Jan de démarrer, le mode sans échec est donc activé.",
+    "safeModeFailed": "Des extensions installées ont empêché Jan de démarrer, et le mode sans échec n'a pas pu être activé. Elles ne sont pas chargées cette fois."
+  },
+  "commands": "Commandes",
+  "categorizedCommand": "{{category}} : {{title}}",
+  "commandFailed": "{{command}} ({{extension}}) a échoué",
+  "moreActions": "Plus d'actions",
+  "extensionLabel": "Extension : {{extension}}",
+  "statusItemTooltip": "Extension : {{extension}} - {{text}}",
+  "settingSaveFailed": "Impossible d'enregistrer {{setting}}",
+  "activationFailed": "Échec du démarrage : {{error}}",
+  "state": {
+    "inactive": "Inactive",
+    "activating": "Démarrage",
+    "active": "Active",
+    "failed": "Échec",
+    "crashed": "Plantage"
+  },
+  "development": "Développement",
+  "unload": "Décharger",
+  "unloadFailed": "Impossible de décharger {{extension}} : {{error}}",
+  "risk": {
+    "low": "Risque faible",
+    "medium": "Risque moyen",
+    "high": "Risque élevé"
+  },
+  "devLoad": {
+    "button": "Charger depuis un dossier",
+    "title": "Charger {{name}} depuis un dossier ?",
+    "description": "Cette extension de développement tournera jusqu'au redémarrage de Jan. Elle obtient tout ce qu'elle demande :",
+    "proposals": "API proposées : {{proposals}}",
+    "confirm": "Charger",
+    "readFailed": "Impossible de lire {{file}} : {{error}}",
+    "invalidJson": "package.json n'est pas un JSON valide : {{error}}",
+    "invalidManifest": "Le manifeste est invalide : {{errors}}",
+    "invalidBundle": "{{file}} n'est pas un paquet d'extension valide : {{error}}",
+    "alreadyLoaded": "Une extension avec l'identifiant {{id}} est déjà chargée"
+  },
+  "permissions": {
+    "uiNotify": {
+      "title": "Afficher des notifications",
+      "description": "Affiche de courts messages dans l'application, étiquetés avec le nom de l'extension."
+    },
+    "network": {
+      "title": "Se connecter à {{host}}",
+      "description": "Envoyer des requêtes à cet hôte et lire les réponses.",
+      "localServers": "Inclut les serveurs sur cet ordinateur sur n'importe quel port : localhost et 127.0.0.1 en http ou https, d'autres adresses locales telles que ::1 en https uniquement. Le serveur d'API local de Jan est toujours bloqué.",
+      "localPorts": "Couvre tous les ports de cet hôte, en http ou https, sauf le serveur d'API local de Jan, toujours bloqué."
+    },
+    "providers": {
+      "title": "Ajouter des fournisseurs de modèles",
+      "description": "Ajoute des fournisseurs de modèles qui apparaissent dans le sélecteur de modèle. Les réponses sont affichées sans images web, elles ne peuvent donc pas faire contacter Jan à d'autres serveurs."
+    },
+    "tools": {
+      "title": "Ajouter des outils pour les modèles",
+      "description": "Ajoute des outils que les modèles peuvent appeler pendant une discussion. Chaque appel demande quand même votre approbation."
+    },
+    "conversationsRead": {
+      "title": "Lire vos conversations",
+      "description": "Lit vos fils et les messages qu'ils contiennent."
+    },
+    "conversationsWrite": {
+      "title": "Modifier vos conversations",
+      "description": "Crée des fils et y ajoute des messages. Les messages ajoutés sont affichés sans images web, ils ne peuvent donc pas faire contacter Jan à d'autres serveurs."
+    },
+    "chatHooks": {
+      "title": "Modifier les messages avant envoi",
+      "description": "Réécrit le texte de vos messages avant qu'ils n'atteignent le modèle."
+    }
+  },
+  "cancel": "Annuler",
+  "noPermissions": "Elle ne demande aucune permission.",
+  "tabs": {
+    "installed": "Installées",
+    "catalog": "Catalogue"
+  },
+  "sections": {
+    "builtin": "Intégrées",
+    "installed": "Installées",
+    "development": "Chargées pour le développement"
+  },
+  "noneInstalled": "Aucune extension installée pour l'instant.",
+  "enable": "Activer {{name}}",
+  "details": {
+    "open": "Détails",
+    "back": "Retour aux extensions",
+    "version": "Version {{version}}",
+    "rollback": "Revenir à {{version}}",
+    "permissions": "Permissions accordées",
+    "revoke": "Révoquer",
+    "settings": "Paramètres",
+    "uninstall": "Désinstaller",
+    "uninstallTitle": "Désinstaller {{name}} ?",
+    "uninstallDescription": "Ses fichiers sont supprimés de cet ordinateur. Action irréversible.",
+    "builtinFixed": "Les extensions intégrées font partie de Jan et ne peuvent être ni désactivées ni désinstallées.",
+    "notFound": "Cette extension n'est pas installée."
+  },
+  "origin": {
+    "unverified": "Non vérifié",
+    "unverifiedHint": "Ce fichier ne provient pas d'un index que vous avez ajouté. Ne l'installez que si vous faites confiance à qui vous l'a donné.",
+    "sha512": "SHA-512 : {{hash}}",
+    "trustAuthor": "Je fais confiance à l'auteur de ce fichier",
+    "fromSource": "Depuis {{source}}",
+    "integrityChecked": "Intégrité vérifiée",
+    "integrityCheckedUnsigned": "Intégrité vérifiée (source non signée)",
+    "verifiedBy": "Vérifié par {{source}}",
+    "unsignedSource": "Source non signée",
+    "unsignedSourceHint": "Cet index n'a pas de clé de signature épinglée : rien ne prouve qui a publié cette liste. N'installez que si vous faites confiance à l'index.",
+    "trustSource": "Je fais confiance à l'auteur et à cet index"
+  },
+  "install": {
+    "fromFile": "Installer depuis un fichier…",
+    "bundleFilter": "Paquet d'extension",
+    "title": "Installer {{name}} ?",
+    "description": "Version {{version}} par {{publisher}}. Ces permissions lui seront accordées :",
+    "confirm": "Installer",
+    "done": "{{name}} {{version}} installé"
+  },
+  "update": {
+    "title": "Mettre à jour {{name}} vers {{version}} ?",
+    "description": "Vous avez la version {{version}}. Les permissions déjà accordées sont conservées.",
+    "confirm": "Mettre à jour",
+    "added": "Nouvelles permissions",
+    "removed": "Plus nécessaires",
+    "nothingAdded": "Cette mise à jour ne demande aucune nouvelle permission."
+  },
+  "sourceChange": {
+    "indexWasIndex": "Cette mise à jour vient de {{next}}, mais {{name}} a été installé depuis {{previous}}.",
+    "indexWasFile": "Cette mise à jour vient de {{next}}, mais {{name}} a été installé depuis le fichier {{file}}.",
+    "fileWasIndex": "Cette mise à jour est un fichier du disque, mais {{name}} a été installé depuis {{previous}}.",
+    "unsigned": "{{name}} a été vérifié par la clé de signature de {{previous}}, mais cette mise à jour n'est pas signée."
+  },
+  "safeMode": {
+    "title": "Mode sans échec",
+    "description": "Démarre Jan sans charger aucune extension installée. Les extensions intégrées tournent toujours.",
+    "banner": "Le mode sans échec est actif. Les extensions installées ne sont pas chargées.",
+    "turnOff": "Désactiver le mode sans échec"
+  },
+  "sources": {
+    "title": "Sources d'index",
+    "description": "Un index liste les extensions que vous pouvez installer. N'ajoutez que des index de confiance.",
+    "none": "Aucune source pour l'instant. Ajoutez une URL d'index pour parcourir ses extensions.",
+    "url": "URL de l'index",
+    "name": "Nom",
+    "publicKey": "Clé publique (facultatif)",
+    "add": "Ajouter la source",
+    "remove": "Supprimer {{name}}",
+    "removeKeyed": {
+      "title": "Supprimer {{name}} et sa clé de signature ?",
+      "description": "Sa clé épinglée est oubliée avec. Si vous rajoutez cet index sans la clé, ses listes ne seront plus vérifiées par signature. Les extensions installées restent installées. Clé épinglée :",
+      "confirm": "Supprimer la source"
+    },
+    "removedPin": {
+      "warning": "Cet index avait une clé de signature épinglée quand vous l'avez supprimé. Sans clé, ses listes ne sont plus signées. Rajoutez-le avec sa clé, ou appuyez à nouveau sur Ajouter la source pour continuer sans.",
+      "key": "Clé épinglée précédemment :"
+    },
+    "notice": {
+      "dropped": "Certaines sources enregistrées ont échoué à une vérification et ont été supprimées : {{sources}}. Le fichier précédent a été conservé à {{path}}.",
+      "unreadable": "Les sources enregistrées n'ont pas pu être lues, aucune n'est listée. Le fichier précédent a été conservé à {{path}}."
+    },
+    "keyPinned": "Clé de signature épinglée",
+    "unsignedHint": "Aucune clé de signature épinglée : les installations depuis cet index demandent votre confiance explicite.",
+    "rotate": {
+      "offer": "Cet index annonce une nouvelle clé de signature.",
+      "review": "Examiner la nouvelle clé",
+      "title": "Changer la clé de signature de {{name}} ?",
+      "description": "L'index, signé avec la clé que vous avez épinglée, nomme une nouvelle clé avec laquelle il sera signé ensuite. Après acceptation, seuls les index signés avec la nouvelle clé sont de confiance. N'acceptez que si vous attendiez ce changement.",
+      "current": "Clé épinglée",
+      "next": "Nouvelle clé",
+      "confirm": "Épingler la nouvelle clé"
+    },
+    "errors": {
+      "invalidUrl": "Entrez une URL valide.",
+      "notHttps": "Seules les URL https sont autorisées.",
+      "credentials": "L'URL ne doit pas contenir de nom d'utilisateur ni de mot de passe.",
+      "required": "Entrez un nom.",
+      "invalidKey": "Entrez une clé publique ed25519 en base64."
+    }
+  },
+  "catalog": {
+    "loading": "Chargement du catalogue…",
+    "empty": "Cet index ne liste aucune extension.",
+    "by": "par {{publisher}}",
+    "install": "Installer",
+    "update": "Mettre à jour vers {{version}}",
+    "installed": "Installée",
+    "provenance": "Provenance indiquée par la source"
+  },
+  "errors": {
+    "list": "Impossible de lire les extensions installées : {{error}}",
+    "stage": "Impossible d'ouvrir l'extension : {{error}}",
+    "install": "Impossible d'installer {{name}} : {{error}}",
+    "change": "La modification a échoué : {{error}}",
+    "catalog": "Impossible de charger {{source}} : {{error}}"
+  }
+}

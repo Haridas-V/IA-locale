@@ -1,0 +1,8 @@
+[package]
+name = "gguf-meta"
+version = "0.1.0"
+edition = "2021"
+description = "Lecture d'en-tête GGUF et estimation VRAM pour IA Locale (fork Jan)"
+license = "MIT"
+
+[dependencies]
