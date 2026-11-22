@@ -71,8 +71,12 @@ Exemples : `sudo apt install libgl1 libegl1 libxkbcommon0 libdbus-1-3 libfontcon
 L'AppImage embarque **l'interface** mais **pas les moteurs d'inférence** (trop lourds et dépendants du GPU). Sans moteur, le chargement d'un modèle affiche un message clair indiquant la commande d'installation. Les moteurs s'installent dans l'environnement Python embarqué, par exemple via l'interpréteur de l'AppImage extrait :
 
 ```sh
-./IA-Locale-x86_64.AppImage --appimage-extract   # extrait dans squashfs-root/
-squashfs-root/usr/python/bin/python3 -m pip install llama-cpp-python   # GGUF, CPU
+./IA-Locale-x86_64.AppImage --appimage-extract   # extrait dans squashfs-root/ (dossier courant)
+PY="$PWD/squashfs-root/usr/python/bin/python3"
+$PY -m pip install llama-cpp-python               # GGUF, CPU
+# si « No module named pip » : curl -sS https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py && $PY /tmp/get-pip.py
+# puis lancez toujours via : ./squashfs-root/AppRun --dossier-modeles "$PWD/models"
+# (le lancement via l'AppImage montée ne voit pas les paquets installés dans squashfs-root/)
 ```
 
 | Usage | Commande d'installation du moteur |
