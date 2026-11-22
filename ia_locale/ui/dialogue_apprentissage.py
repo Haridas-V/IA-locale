@@ -134,6 +134,7 @@ class DialogueApprentissage(QDialog):
             self.label_progression.setText("Indiquez un sujet (ou des URLs) avant de lancer.")
             return
         urls = [u.strip() for u in self.edit_urls.toPlainText().splitlines() if u.strip()]
+        self._urls_fournies = bool(urls)
         limites = self._limites()
         apprenant = Apprenant(dossier_apprentissages(), limites)
         self.bouton_lancer.setEnabled(False)
@@ -153,11 +154,13 @@ class DialogueApprentissage(QDialog):
     def _on_termine(self, resultat):
         self._resultat = resultat
         self.bouton_lancer.setEnabled(True)
-        self.bouton_utiliser.setEnabled(True)
-        self.label_progression.setText(
-            f"Terminé : {len(resultat.sources)} page(s) lue(s), résumé de {len(resultat.resume)} caractères "
-            f"(limite {self.spin_resume.value()}), stocké dans {resultat.fichier}"
-        )
+        self.bouton_utiliser.setEnabled(bool(resultat.sources))
+        message = (f"Terminé : {len(resultat.sources)} page(s) lue(s), résumé de {len(resultat.resume)} caractères "
+                   f"(limite {self.spin_resume.value()}), stocké dans {resultat.fichier}")
+        if not resultat.sources and not getattr(self, "_urls_fournies", False):
+            message += ("\nAucune page trouvée par la recherche automatique : collez directement des URLs "
+                        "(une par ligne) dans le champ prévu, puis relancez.")
+        self.label_progression.setText(message)
         self.zone_resultat.setPlainText(resultat.resume)
 
     def _on_erreur(self, message: str):

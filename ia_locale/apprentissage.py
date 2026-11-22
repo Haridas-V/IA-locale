@@ -18,6 +18,14 @@ from pathlib import Path
 
 ENTETES = {"User-Agent": "IA-Locale/1.0 (apprentissage local; lecture seule)"}
 
+# Moteurs de recherche essayés dans l'ordre (le {q} est remplacé par la requête encodée)
+MOTEURS_RECHERCHE = [
+    "https://html.duckduckgo.com/html/?q={q}",
+    "https://lite.duckduckgo.com/lite/?q={q}",
+    "https://www.bing.com/search?q={q}&count=20",
+]
+HOTES_EXCLUS = ("duckduckgo.com", "bing.com", "microsoft.com", "msn.com", "live.com")
+
 
 class _ExtracteurTexte(HTMLParser):
     _IGNORER = {"script", "style", "noscript", "svg", "head"}
@@ -100,26 +108,33 @@ class Apprenant:
         self.dossier.mkdir(parents=True, exist_ok=True)
         self.limites = limites
 
-    def rechercher_urls(self, sujet: str, max_urls: int = 10) -> list[str]:
-        """Recherche des URLs via DuckDuckGo (HTML léger)."""
-        requete = urllib.parse.urlencode({"q": sujet})
-        url = f"https://html.duckduckgo.com/html/?{requete}"
-        try:
-            html = self._telecharger(url)
-        except Exception:
-            return []
-        urls = []
-        for m in re.finditer(r'href="(https?://[^"]+)"', html):
-            cible = m.group(1)
-            if "duckduckgo.com" in cible:
+    def rechercher_urls(self, sujet: str, max_urls: int = 10, endpoints=None) -> list[str]:
+        """Recherche des URLs via plusieurs moteurs (DuckDuckGo html/lite, Bing).
+
+        Gère les liens de redirection DDG « //duckduckgo.com/l/?uddg=<url encodée> ».
+        """
+        urls: list[str] = []
+        requete = urllib.parse.quote(sujet)
+        for template in (endpoints or MOTEURS_RECHERCHE):
+            try:
+                html = self._telecharger(template.format(q=requete))
+            except Exception:
                 continue
-            cible = cible.split("uddg=")[-1]
-            if "uddg=" in m.group(1):
-                cible = urllib.parse.unquote(cible)
-            if cible.startswith("http") and cible not in urls:
-                urls.append(cible)
-            if len(urls) >= max_urls:
-                break
+            for href in re.findall(r'href="([^"]+)"', html):
+                cible = href
+                m = re.search(r"[?&]uddg=([^&]+)", href)
+                if m:
+                    cible = urllib.parse.unquote(m.group(1))
+                if cible.startswith("//"):
+                    cible = "https:" + cible
+                if not cible.startswith("http"):
+                    continue
+                if any(h in cible for h in HOTES_EXCLUS):
+                    continue
+                if cible not in urls:
+                    urls.append(cible)
+                if len(urls) >= max_urls:
+                    return urls
         return urls
 
     def _telecharger(self, url: str) -> str:
@@ -134,10 +149,10 @@ class Apprenant:
         parseur.feed(html)
         return parseur.texte(), parseur._titre
 
-    def apprendre(self, sujet: str, urls: list[str] | None = None, on_progression=None) -> ResultatApprentissage:
+    def apprendre(self, sujet: str, urls: list[str] | None = None, on_progression=None, endpoints=None) -> ResultatApprentissage:
         limites = self.limites
         if not urls:
-            urls = self.rechercher_urls(sujet, max_urls=limites.max_pages)
+            urls = self.rechercher_urls(sujet, max_urls=limites.max_pages, endpoints=endpoints)
         urls = urls[: limites.max_pages]
         sources: list[SourceApprise] = []
         total = 0

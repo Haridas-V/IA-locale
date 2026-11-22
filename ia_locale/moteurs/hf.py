@@ -20,11 +20,13 @@ class MoteurTransformers(MoteurBase):
             import accelerate  # noqa: F401
             return True, "transformers + torch sont installés."
         except ImportError:
+            import sys
             return False, (
                 "Le moteur Transformers n'est pas installé.\n"
-                "  - CPU : pip install transformers accelerate torch\n"
-                "  - GPU NVIDIA : pip install torch --index-url https://download.pytorch.org/whl/cu124\n"
-                "    puis : pip install transformers accelerate\n"
+                f"Installez-le dans le Python utilisé par l'application :\n"
+                f"  {sys.executable} -m pip install transformers accelerate torch          # CPU\n"
+                f"  {sys.executable} -m pip install torch --index-url https://download.pytorch.org/whl/cu124\n"
+                f"  {sys.executable} -m pip install transformers accelerate                # GPU NVIDIA\n"
                 "Le GPU nécessite torch compilé avec le backend adapté (CUDA, ROCm, etc.)."
             )
 

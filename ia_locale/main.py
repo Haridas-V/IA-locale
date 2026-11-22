@@ -19,6 +19,7 @@ def analyser_arguments(argv=None):
     parser.add_argument("--dossier-modeles", help="Dossier models/ à utiliser (sinon détection automatique).")
     parser.add_argument("--mock", action="store_true", help="Moteur de démonstration (tests, aucun vrai modèle requis).")
     parser.add_argument("--auto-test", action="store_true", help="Affiche la fenêtre puis quitte après 3 s (vérification de démarrage).")
+    parser.add_argument("--diagnostic", action="store_true", help="Affiche Python, moteurs disponibles et modèles détectés, puis quitte.")
     parser.add_argument("--version", action="version", version=f"{NOM_APPLICATION} {__version__}")
     return parser.parse_args(argv)
 
@@ -29,13 +30,35 @@ def main(argv=None) -> int:
         import os
         os.environ["IA_LOCALE_MOCK"] = "1"
 
+    etat = EtatApplication()
+    if args.diagnostic:
+        import importlib
+        print(f"{NOM_APPLICATION} {__version__} — diagnostic")
+        print("Python utilisé :", sys.executable)
+        print("Version Python :", sys.version.split()[0])
+        for label, module in (("llama-cpp-python (GGUF)", "llama_cpp"),
+                              ("transformers", "transformers"),
+                              ("torch", "torch"),
+                              ("accelerate", "accelerate")):
+            try:
+                mod = importlib.import_module(module)
+                print(f"  {label} : OK ({getattr(mod, '__version__', '?')})")
+            except ImportError:
+                print(f"  {label} : ABSENT → {sys.executable} -m pip install {module.replace('_', '-') if module == 'llama_cpp' else module}")
+        print("Dossier des modèles :", etat.dossier_modeles)
+        if etat.modeles:
+            for m in etat.modeles:
+                print("  -", m.nom, "|", m.resume())
+        else:
+            print("  (aucun modèle détecté)")
+        return 0
+
     app = QApplication(sys.argv)
     app.setApplicationName("ia-locale")
     app.setOrganizationName("ia-locale")
     app.setApplicationDisplayName(NOM_APPLICATION)
     appliquer_theme(app)
 
-    etat = EtatApplication()
     if args.dossier_modeles:
         etat.config["dossier_modeles"] = args.dossier_modeles
         etat.sauvegarder()
