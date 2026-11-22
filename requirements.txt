@@ -1,0 +1,7 @@
+# Dépendance principale (embarquée dans l'AppImage)
+PySide6>=6.6,<7
+
+# Moteurs d'inférence optionnels (NON embarqués dans l'AppImage — à installer
+# dans l'environnement Python utilisé, voir README.md pour les variantes GPU) :
+# llama-cpp-python        # modèles GGUF (CPU par défaut)
+# transformers accelerate torch  # modèles Transformers (CPU par défaut)
