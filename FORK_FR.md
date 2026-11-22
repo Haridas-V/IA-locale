@@ -31,11 +31,24 @@ et y ajoute les fonctionnalités demandées pour « IA Locale » :
 Jan fournit déjà la config Tauri AppImage (`src-tauri/tauri.linux.conf.json`). Sur une machine Linux x86_64 :
 
 ```sh
-sudo apt install -y libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev \
-  libjavascriptcoregtk-4.1-dev build-essential curl pkg-config librsvg2-dev
-yarn install
-yarn build:tauri          # produit src-tauri/target/release/bundle/appimage/*.AppImage
+# Ubuntu 24.04 : libwebkit2gtk-4.1-dev ; Ubuntu 22.04 : libwebkit2gtk-4.0-dev à la place
+sudo apt install -y wget git curl pkg-config build-essential librsvg2-dev \
+  libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
+
+# outillage : yarn 4.5.3 (épinglé via packageManager) + Rust 1.98 (rust-toolchain.toml)
+corepack enable                                   # PAS le yarn 0.x du système
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"                         # + l'ajouter à ~/.bashrc
+
+yarn install                                      # ~1-2 min
+yarn build:tauri                                  # 10-20 min (cargo) — plusieurs Go de RAM/disk
+# AppImage : src-tauri/target/release/bundle/appimage/Jan-*.AppImage
 ```
+
+Pièges vérifiés dans le code : `wget` requis (shim linuxdeploy), `corepack enable` obligatoire,
+rustup obligatoire (le cargo apt 1.75 est trop vieux), `src-tauri/icons/icon.png` désormais poussé,
+`APPIMAGE_EXTRACT_AND_RUN=1` est déjà géré par les scripts (pas besoin de FUSE), la sortie finale
+s'appelle `Jan-*.AppImage` (repackagée par `build-utils/buildAppImage.sh` après `download:bin`).
 
 Dépendances runtime de l'AppImage : glibc ≥ 2.28, webkit2gtk-4.1, gtk3, libsoup-3.0 (présents sur la plupart des distros de bureau). L'AppImage s'ouvre **sans modèle** (état vide prévu).
 
