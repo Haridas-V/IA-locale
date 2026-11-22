@@ -95,6 +95,17 @@ $PY -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/
 
 **RAM/VRAM** : prévoir au moins la taille du modèle en RAM (CPU) ou VRAM (GPU), **plus le cache du contexte** (ex. contexte 4096 ≈ quelques centaines de Mio selon le modèle) — l'estimation s'affiche dans la Bibliothèque.
 
+## Paquet .deb (x86_64)
+
+```sh
+sh build_appimage.sh     # produit aussi build/AppDir (réutilisé)
+sh build_deb.sh          # -> dist/ia-locale_1.0.0_amd64.deb
+sudo dpkg -i dist/ia-locale_1.0.0_amd64.deb   # installe dans /opt/ia-locale + entrée de menu
+ia-locale                                       # lance depuis le menu ou un terminal
+```
+
+Le paquet déclare ses dépendances (`libgl1`, `libegl1`, `libxkbcommon0`, `libdbus-1-3`, `libfontconfig1`, `libglib2.0-0`) et s'ouvre sans modèle.
+
 ## Développement
 
 ```sh

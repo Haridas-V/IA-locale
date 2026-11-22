@@ -1,0 +1,13 @@
+Package: ia-locale
+Version: 1.0.0
+Architecture: amd64
+Maintainer: IA Locale <vibe-code@localhost>
+Section: utils
+Priority: optional
+Depends: libgl1, libegl1, libxkbcommon0, libdbus-1-3, libfontconfig1, libglib2.0-0
+Recommends: libfuse2t64 | libfuse2
+Description: IA Locale — modèles d'IA locaux (GGUF, Transformers) sans navigateur
+ Application de bureau Linux sombre et entièrement en français pour discuter
+ avec des modèles d'IA locaux déposés dans un dossier models/.
+ Interface native Qt (aucun navigateur, aucun serveur local).
+ Modes de calcul Auto/CPU/GPU/Hybride, profils matériels par modèle, mode learn.
