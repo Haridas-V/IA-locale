@@ -37,6 +37,9 @@ def dossier_modeles_candidats(cfg: dict) -> list[Path]:
         # puis dossier de données utilisateur (jamais le montage lecture seule).
         candidats.append(Path(appimage).resolve().parent / "models")
     else:
+        app_dir = os.environ.get("IA_LOCALE_APP_DIR")
+        if app_dir:
+            candidats.append(Path(app_dir) / "models")
         candidats.append(racine_application() / "models")
     candidats.append(dossier_donnees() / "models")
     return candidats
