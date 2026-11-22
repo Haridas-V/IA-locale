@@ -22,8 +22,8 @@ class MoteurGGUF(MoteurBase):
             return False, (
                 "Le moteur GGUF (llama-cpp-python) n'est pas installé.\n"
                 f"Installez-le dans le Python utilisé par l'application :\n"
-                f"  {sys.executable} -m pip install llama-cpp-python          # CPU\n"
-                f"  {sys.executable} -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124   # GPU NVIDIA (CUDA)\n"
+                f"  {sys.executable} -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu   # CPU (roue précompilée)\n"
+                f"  {sys.executable} -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124   # GPU NVIDIA (CUDA 12.4)\n"
                 f"  CMAKE_ARGS=\"-DGGML_VULKAN=ON\" {sys.executable} -m pip install llama-cpp-python --no-binary :all:   # GPU Vulkan\n"
                 f"  CMAKE_ARGS=\"-DGGML_HIP=ON\" {sys.executable} -m pip install llama-cpp-python --no-binary :all:   # GPU AMD (ROCm)\n"
                 "Le GPU nécessite un moteur compilé avec le backend adapté à votre carte."

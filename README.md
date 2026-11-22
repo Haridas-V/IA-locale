@@ -73,20 +73,23 @@ L'AppImage embarque **l'interface** mais **pas les moteurs d'inférence** (trop 
 ```sh
 ./IA-Locale-x86_64.AppImage --appimage-extract   # extrait dans squashfs-root/ (dossier courant)
 PY="$PWD/squashfs-root/usr/python/bin/python3"
-$PY -m pip install llama-cpp-python               # GGUF, CPU
+# GGUF, CPU (roue précompilée — llama-cpp-python ne publie PAS de roue sur PyPI,
+# il faut l'index alternatif, sinon pip tente une compilation qui échoue) :
+$PY -m pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
 # si « No module named pip » : curl -sS https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py && $PY /tmp/get-pip.py
 # puis lancez toujours via : ./squashfs-root/AppRun --dossier-modeles "$PWD/models"
 # (le lancement via l'AppImage montée ne voit pas les paquets installés dans squashfs-root/)
 ```
 
-| Usage | Commande d'installation du moteur |
+| Usage | Commande d'installation du moteur (dans le Python de l'AppImage, préfixée par `$PY -m pip`) |
 |---|---|
-| GGUF, CPU | `pip install llama-cpp-python` |
-| GGUF, GPU **NVIDIA (CUDA)** | `pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124` |
-| GGUF, GPU **Vulkan** (AMD/Intel/NVIDIA) | `CMAKE_ARGS="-DGGML_VULKAN=ON" pip install llama-cpp-python --no-binary :all:` |
-| GGUF, GPU **AMD (ROCm)** | `CMAKE_ARGS="-DGGML_HIP=ON" pip install llama-cpp-python --no-binary :all:` |
-| Transformers, CPU | `pip install transformers accelerate torch` |
-| Transformers, GPU NVIDIA | `pip install torch --index-url https://download.pytorch.org/whl/cu124` puis `pip install transformers accelerate` |
+| GGUF, CPU | `install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu` (roue précompilée ; **sans** cet index, pip tente une compilation) |
+| GGUF, GPU **NVIDIA (CUDA 12.4)** | `install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124` |
+| GGUF, GPU **Vulkan** (AMD/Intel/NVIDIA) | `sudo apt install build-essential cmake libvulkan-dev` puis `CMAKE_ARGS="-DGGML_VULKAN=ON" install llama-cpp-python --no-binary :all:` |
+| GGUF, GPU **AMD (ROCm)** | `CMAKE_ARGS="-DGGML_HIP=ON" install llama-cpp-python --no-binary :all:` (nécessite ROCm installé) |
+| GGUF, compilation de secours | `sudo apt install build-essential cmake` puis `install llama-cpp-python --no-binary :all:` (~10 min) |
+| Transformers, CPU | `install transformers accelerate torch` |
+| Transformers, GPU NVIDIA | `install torch --index-url https://download.pytorch.org/whl/cu124` puis `install transformers accelerate` |
 
 **Règle importante** : l'utilisation du **GPU nécessite un moteur compilé avec le backend adapté à la carte graphique** (CUDA, ROCm, Vulkan…). Un moteur CPU-only fera tout le calcul en CPU même en mode GPU/Hybride.
 
